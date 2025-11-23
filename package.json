@@ -1,0 +1,29 @@
+{
+  "name": "amm-arbitrage-system",
+  "version": "1.0.0",
+  "description": "Cross-AMM Arbitrage Bot for Concentrated and Pseudo-Arbitrage AMMs",
+  "main": "scripts/monitor.js",
+  "scripts": {
+    "monitor": "node scripts/monitor.js",
+    "start": "npm run monitor",
+    "test": "forge test"
+  },
+  "keywords": [
+    "defi",
+    "amm",
+    "arbitrage",
+    "ethereum",
+    "smart-contracts"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^5.7.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
+

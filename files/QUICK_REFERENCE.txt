@@ -1,0 +1,248 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║          PSEUDOARBITRAGE AMM - QUICK REFERENCE GUIDE                 ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📁 YOUR FILES (Organize These)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Original Files → Where They Go:
+┌─────────────────────────────────┬────────────────────────────────┐
+│ PseudoArbitrage.sol             │ → src/instructions/            │
+│ PseudoArbitrageOpcodes.sol      │ → src/opcodes/                 │
+│ PseudoArbitrageAMM.sol          │ → src/strategies/              │
+│ PseudoArbitrageSwapVMRouter.sol │ → src/routers/                 │
+└─────────────────────────────────┴────────────────────────────────┘
+
+📚 DOCUMENTATION (Read These)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ⭐ README.md
+   └─→ Start here! Complete overview and quick start guide
+
+2. 📋 DEPLOYMENT_GUIDE.md
+   └─→ Architecture overview and deployment strategy
+
+3. 📖 STEP_BY_STEP_GUIDE.md
+   └─→ Detailed walkthrough with commands and troubleshooting
+
+🔧 SCRIPTS & TOOLS (Use These)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ⚙️ setup.sh (Automated Setup)
+   └─→ chmod +x setup.sh && ./setup.sh
+   └─→ Creates project structure automatically
+
+2. 🚀 Deploy.s.sol (Deployment Scripts)
+   └─→ Copy to: script/Deploy.s.sol
+   └─→ Contains deployment logic for both testing and production
+
+🧪 TESTS (Implement These)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 🔬 PseudoArbitrage.t.sol (Unit Tests)
+   └─→ Copy to: test/PseudoArbitrage.t.sol
+   └─→ Tests core pseudo-arbitrage logic
+
+2. 🧩 PseudoArbitrageIntegration.t.sol (Integration Tests)
+   └─→ Copy to: test/PseudoArbitrageIntegration.t.sol
+   └─→ Tests complete system end-to-end
+
+⚡ QUICK START (3 Options)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ OPTION 1: Automated (Fastest)                                       │
+├─────────────────────────────────────────────────────────────────────┤
+│ $ chmod +x setup.sh                                                 │
+│ $ ./setup.sh                                                        │
+│ $ # Follow on-screen instructions                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ OPTION 2: Manual Setup                                              │
+├─────────────────────────────────────────────────────────────────────┤
+│ 1. Read README.md for overview                                      │
+│ 2. Follow STEP_BY_STEP_GUIDE.md                                     │
+│ 3. Copy files to correct locations                                  │
+│ 4. Install dependencies: forge install                              │
+│ 5. Build: forge build                                               │
+│ 6. Test: forge test                                                 │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ OPTION 3: Existing Project                                          │
+├─────────────────────────────────────────────────────────────────────┤
+│ If you already have a Foundry project:                              │
+│ 1. Copy contract files to your src/ directory                       │
+│ 2. Copy test files to your test/ directory                          │
+│ 3. Copy deploy script to your script/ directory                     │
+│ 4. Install: forge install 1inch/swap-vm                             │
+│ 5. Build: forge build                                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+🎯 DEPLOYMENT CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌──┬───────────────────────────────────────────────────┬──────────────┐
+│  │ Task                                              │ Status       │
+├──┼───────────────────────────────────────────────────┼──────────────┤
+│□ │ Install Foundry                                   │ Required     │
+│□ │ Run setup.sh or manual setup                      │ Required     │
+│□ │ Install SwapVM dependency                         │ Required     │
+│□ │ Copy contract files to correct directories        │ Required     │
+│□ │ Fix import paths                                  │ Required     │
+│□ │ Successful compilation (forge build)              │ Required     │
+│□ │ Unit tests pass                                   │ Required     │
+│□ │ Deploy to local Anvil                             │ Recommended  │
+│□ │ Integration tests pass                            │ Recommended  │
+│□ │ Deploy to testnet                                 │ Recommended  │
+│□ │ Professional audit                                │ For mainnet  │
+│□ │ Deploy to mainnet                                 │ Final step   │
+└──┴───────────────────────────────────────────────────┴──────────────┘
+
+🔑 KEY DEPENDENCIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your contracts need:
+
+1. ⚠️ 1inch SwapVM Framework (Critical)
+   ├─→ Contains: VM, Context, Instructions
+   ├─→ Install: forge install 1inch/swap-vm
+   └─→ Or: git clone https://github.com/1inch/swap-vm.git lib/swap-vm
+
+2. 📦 OpenZeppelin Contracts
+   ├─→ Contains: SafeCast, Math utilities
+   ├─→ Install: forge install OpenZeppelin/openzeppelin-contracts@v5.1.0
+   └─→ Included in setup.sh
+
+3. 🔗 Aqua Settlement Layer
+   ├─→ Production: Get address from 1inch
+   └─→ Testing: Use MockAqua (included in Deploy.s.sol)
+
+⚠️ CRITICAL NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Import Path Fixes Required
+   Your contracts have relative imports:
+   ❌ import { Context } from "../libs/VM.sol";
+   ✅ import { Context } from "swap-vm/libs/VM.sol";
+
+2. SwapVM Installation is Mandatory
+   Without SwapVM, contracts won't compile.
+   The framework provides essential infrastructure.
+
+3. Solidity Version: 0.8.30
+   Must use exact version. Check with: forge --version
+
+4. Test on Testnet First
+   Never deploy directly to mainnet.
+   Use Sepolia or other testnets.
+
+5. Get Professional Audit
+   Before mainnet deployment with real funds.
+
+📊 PROJECT STRUCTURE (After Setup)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+pseudo-arbitrage-amm/
+├── src/
+│   ├── instructions/
+│   │   └── PseudoArbitrage.sol ← Your file
+│   ├── opcodes/
+│   │   └── PseudoArbitrageOpcodes.sol ← Your file
+│   ├── routers/
+│   │   └── PseudoArbitrageSwapVMRouter.sol ← Your file
+│   └── strategies/
+│       └── PseudoArbitrageAMM.sol ← Your file
+├── test/
+│   ├── PseudoArbitrage.t.sol
+│   └── PseudoArbitrageIntegration.t.sol
+├── script/
+│   └── Deploy.s.sol
+├── lib/
+│   ├── forge-std/
+│   ├── openzeppelin-contracts/
+│   └── swap-vm/ ← Must install!
+├── foundry.toml
+├── .env (create from .env.example)
+└── Makefile
+
+🔗 USEFUL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build:
+  $ forge build
+  $ make build
+
+Test:
+  $ forge test -vv
+  $ make test
+  $ make test-gas  # With gas reporting
+
+Deploy Local:
+  $ anvil  # Terminal 1
+  $ make deploy-local  # Terminal 2
+
+Deploy Testnet:
+  $ make deploy-testnet
+  $ forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
+
+Format Code:
+  $ forge fmt
+  $ make format
+
+Clean:
+  $ forge clean
+  $ make clean
+
+🆘 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ "Cannot find SwapVM imports"
+   └─→ Install: git clone https://github.com/1inch/swap-vm.git lib/swap-vm
+   └─→ Fix remappings in foundry.toml
+
+❌ "Compilation failed"
+   └─→ Check Solidity version: forge --version
+   └─→ Run: forge clean && forge build
+
+❌ "Tests won't run"
+   └─→ Install: forge install foundry-rs/forge-std
+
+❌ "Import paths broken"
+   └─→ Update imports from relative to remapped paths
+   └─→ See STEP_BY_STEP_GUIDE.md for examples
+
+📚 LEARNING RESOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 Paper: https://arxiv.org/abs/2106.00667 (Engel & Herlihy)
+📘 SwapVM: https://github.com/1inch/swap-vm
+📗 Foundry: https://book.getfoundry.sh/
+📙 OpenZeppelin: https://docs.openzeppelin.com/contracts
+
+🎓 What This System Does
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Traditional AMM:
+  Price changes → Arbitrageurs profit → LPs lose (divergence loss)
+
+Pseudo-Arbitrage AMM:
+  Price changes → Curve transforms → LPs keep value (no loss!)
+
+How:
+  1. Oracle reports new price
+  2. Calculate curve transformation
+  3. Shift effective balances
+  4. Future swaps use transformed curve
+  5. LPs maintain value despite price changes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to start? → chmod +x setup.sh && ./setup.sh
+
+Questions? → Read STEP_BY_STEP_GUIDE.md
+
+Good luck! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

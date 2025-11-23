@@ -1,0 +1,28 @@
+# Foundry
+cache/
+out/
+/lib
+broadcast/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deployments (optional - you may want to commit these)
+deployments/*.json
+!deployments/.gitkeep

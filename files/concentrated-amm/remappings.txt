@@ -1,0 +1,5 @@
+@openzeppelin/=../pseudo-arbitrage-amm/lib/openzeppelin-contracts/
+forge-std/=../pseudo-arbitrage-amm/lib/forge-std/src/
+aqua/=../pseudo-arbitrage-amm/lib/aqua/src/
+@1inch/solidity-utils/=../pseudo-arbitrage-amm/lib/swap-vm/node_modules/@1inch/solidity-utils/
+src/=src/
