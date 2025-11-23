@@ -1,0 +1,49 @@
+[profile.default]
+src = "."
+out = "out"
+libs = ["../pseudo-arbitrage-amm/lib", ".."]
+test = "."
+script = "."
+
+solc_version = "0.8.30"
+evm_version = "cancun"
+
+optimizer = true
+optimizer_runs = 1
+
+via_ir = true
+
+# File system permissions for deployment scripts
+fs_permissions = [{ access = "read-write", path = "../deployments" }, { access = "read-write", path = "./" }]
+
+remappings = [
+    "concentrated-amm/=../concentrated-amm/src/",
+    "pseudo-arbitrage-amm/=../pseudo-arbitrage-amm/",
+    "shared-utils/=../shared-utils/src/",
+    "aqua/=../pseudo-arbitrage-amm/lib/aqua/src/",
+    "swap-vm/=../pseudo-arbitrage-amm/lib/swap-vm/src/",
+    "forge-std/=../pseudo-arbitrage-amm/lib/forge-std/src/",
+    "@openzeppelin/=../pseudo-arbitrage-amm/lib/openzeppelin-contracts/",
+    "@1inch/aqua/=../pseudo-arbitrage-amm/lib/aqua/",
+    "@1inch/solidity-utils/=../pseudo-arbitrage-amm/lib/swap-vm/node_modules/@1inch/solidity-utils/",
+    "pyth-sdk-solidity/=../pseudo-arbitrage-amm/lib/pyth-sdk-solidity/"
+]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[rpc_endpoints]
+mainnet = "${MAINNET_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"
+optimism = "${OPTIMISM_RPC_URL}"
+base = "${BASE_RPC_URL}"
+
+[etherscan]
+mainnet = { key = "${ETHERSCAN_API_KEY}" }
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+polygon = { key = "${POLYGONSCAN_API_KEY}" }
+arbitrum = { key = "${ARBISCAN_API_KEY}" }
+optimism = { key = "${OPTIMISTIC_ETHERSCAN_API_KEY}" }
+base = { key = "${BASESCAN_API_KEY}" }
+

@@ -6,14 +6,14 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import { Aqua } from "aqua/Aqua.sol";
-import { ConcentratedAMM } from "../concentrated-amm/ConcentratedAMM.sol";
-import { ConcentratedAMMStrategyBuilder } from "../concentrated-amm/ConcentratedAMMStrategyBuilder.sol";
+import { ConcentratedAMM } from "concentrated-amm/ConcentratedAMM.sol";
+import { ConcentratedAMMStrategyBuilder } from "concentrated-amm/ConcentratedAMMStrategyBuilder.sol";
 import { CrossAMMArbitrage } from "./CrossAMMArbitrage.sol";
 import { CrossAMMArbitrageBot } from "./CrossAMMArbitrageBot.sol";
 import { IArbitrageCallback } from "./interfaces/IArbitrageCallback.sol";
-import { IConcentratedAMMCallback } from "../concentrated-amm/interfaces/IConcentratedAMMCallback.sol";
-import { PseudoArbitrageSwapVMRouter } from "../pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
-import { PseudoArbitrageAMM } from "../pseudo-arbitrage-amm/src/strategies/PseudoArbitrageAMM.sol";
+import { IConcentratedAMMCallback } from "concentrated-amm/interfaces/IConcentratedAMMCallback.sol";
+import { PseudoArbitrageSwapVMRouter } from "pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
+import { PseudoArbitrageAMM } from "pseudo-arbitrage-amm/src/strategies/PseudoArbitrageAMM.sol";
 import { ISwapVM } from "swap-vm/interfaces/ISwapVM.sol";
 
 // Mock ERC20

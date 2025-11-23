@@ -13,9 +13,9 @@ import { SafeERC20 } from "@1inch/solidity-utils/contracts/libraries/SafeERC20.s
 
 import { IAqua } from "aqua/interfaces/IAqua.sol";
 import { AquaApp } from "aqua/AquaApp.sol";
-import { ConcentratedAMM } from "../concentrated-amm/ConcentratedAMM.sol";
-import { IConcentratedAMMCallback } from "../concentrated-amm/interfaces/IConcentratedAMMCallback.sol";
-import { PseudoArbitrageSwapVMRouter } from "../pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
+import { ConcentratedAMM } from "concentrated-amm/ConcentratedAMM.sol";
+import { IConcentratedAMMCallback } from "concentrated-amm/interfaces/IConcentratedAMMCallback.sol";
+import { PseudoArbitrageSwapVMRouter } from "pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
 import { ISwapVM } from "swap-vm/interfaces/ISwapVM.sol";
 import { IArbitrageCallback } from "./interfaces/IArbitrageCallback.sol";
 

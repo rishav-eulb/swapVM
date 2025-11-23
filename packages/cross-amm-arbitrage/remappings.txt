@@ -1,7 +1,9 @@
+shared-utils/=../shared-utils/src/
 aqua/=../pseudo-arbitrage-amm/lib/aqua/src/
 swap-vm/=../pseudo-arbitrage-amm/lib/swap-vm/src/
 forge-std/=../pseudo-arbitrage-amm/lib/forge-std/src/
 @openzeppelin/=../pseudo-arbitrage-amm/lib/openzeppelin-contracts/
-@1inch/=../pseudo-arbitrage-amm/lib/1inch-solidity-utils/
+@1inch/aqua/=../pseudo-arbitrage-amm/lib/aqua/
+@1inch/solidity-utils/=../pseudo-arbitrage-amm/lib/swap-vm/node_modules/@1inch/solidity-utils/
 pyth-sdk-solidity/=../pseudo-arbitrage-amm/lib/pyth-sdk-solidity/
 

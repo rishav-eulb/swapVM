@@ -5,10 +5,10 @@ import "forge-std/Script.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { Aqua } from "aqua/Aqua.sol";
-import { ConcentratedAMM } from "../concentrated-amm/ConcentratedAMM.sol";
-import { ConcentratedAMMStrategyBuilder } from "../concentrated-amm/ConcentratedAMMStrategyBuilder.sol";
-import { PseudoArbitrageSwapVMRouter } from "../pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
-import { PseudoArbitrageAMM } from "../pseudo-arbitrage-amm/src/strategies/PseudoArbitrageAMM.sol";
+import { ConcentratedAMM } from "concentrated-amm/ConcentratedAMM.sol";
+import { ConcentratedAMMStrategyBuilder } from "concentrated-amm/ConcentratedAMMStrategyBuilder.sol";
+import { PseudoArbitrageSwapVMRouter } from "pseudo-arbitrage-amm/src/routers/PseudoArbitrageSwapVMRouter.sol";
+import { PseudoArbitrageAMM } from "pseudo-arbitrage-amm/src/strategies/PseudoArbitrageAMM.sol";
 import { ISwapVM } from "swap-vm/interfaces/ISwapVM.sol";
 import { CrossAMMArbitrage } from "./CrossAMMArbitrage.sol";
 import { CrossAMMArbitrageBot } from "./CrossAMMArbitrageBot.sol";

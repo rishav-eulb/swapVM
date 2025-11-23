@@ -257,7 +257,7 @@ contract MockPyth is IPyth {
     function updatePriceFeeds(bytes[] calldata) external payable { revert("Not implemented"); }
     function updatePriceFeedsIfNecessary(bytes[] calldata, bytes32[] calldata, uint64[] calldata) external payable { revert("Not implemented"); }
     function getUpdateFee(bytes[] calldata) external pure returns (uint) { return 0; }
-    function parsePriceFeedUpdates(bytes[] calldata, bytes32[] calldata, uint64, uint64) external pure returns (PythStructs.PriceFeed[] memory) { revert("Not implemented"); }
-    function parsePriceFeedUpdatesUnique(bytes[] calldata, bytes32[] calldata, uint64, uint64) external pure returns (PythStructs.PriceFeed[] memory) { revert("Not implemented"); }
+    function parsePriceFeedUpdates(bytes[] calldata, bytes32[] calldata, uint64, uint64) external payable returns (PythStructs.PriceFeed[] memory) { revert("Not implemented"); }
+    function parsePriceFeedUpdatesUnique(bytes[] calldata, bytes32[] calldata, uint64, uint64) external payable returns (PythStructs.PriceFeed[] memory) { revert("Not implemented"); }
 }
 

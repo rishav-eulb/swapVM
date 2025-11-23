@@ -9,7 +9,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { PseudoArbitrageOpcodes } from "../opcodes/PseudoArbitrageOpcodes.sol";
 import { SwapVM, ISwapVM } from "swap-vm/SwapVM.sol";
 import { MakerTraitsLib } from "swap-vm/libs/MakerTraits.sol";
-import { ProgramBuilder, Program } from "swap-vm/../test/utils/ProgramBuilder.sol";
+import { ProgramBuilder, Program } from "shared-utils/ProgramBuilder.sol";
 
 import { BalancesArgsBuilder } from "swap-vm/instructions/Balances.sol";
 import { PseudoArbitrageArgsBuilder } from "../instructions/PseudoArbitrage.sol";

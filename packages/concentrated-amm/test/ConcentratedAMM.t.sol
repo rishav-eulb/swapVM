@@ -215,7 +215,10 @@ contract ConcentratedAMMTest is Test, IConcentratedAMMCallback {
             );
 
             uint256 newPrice = amm.getPrice(strategy);
-            console.log("Swap", i + 1, "- Output:", amountOut, "New price:", newPrice);
+            // Split console.log to avoid type signature issues
+            console.log("Swap", i + 1);
+            console.log("Output:", amountOut);
+            console.log("New price:", newPrice);
         }
 
         uint256 finalPrice = amm.getPrice(strategy);
@@ -332,7 +335,8 @@ contract ConcentratedAMMTest is Test, IConcentratedAMMCallback {
         uint256 desiredOut = 100e18;
         uint256 expectedIn = amm.quoteExactOut(strategy, true, desiredOut);
 
-        console.log("To receive", desiredOut, "token1, need", expectedIn, "token0");
+        console.log("To receive", desiredOut, "token1");
+        console.log("Need", expectedIn, "token0");
 
         // Execute swap
         vm.prank(taker);
@@ -391,11 +395,13 @@ contract ConcentratedAMMTest is Test, IConcentratedAMMCallback {
         console.log("Tick to Price conversions:");
         for (uint i = 0; i < ticks.length; i++) {
             uint256 price = builder.tickToPrice(ticks[i]);
-            console.log("Tick", uint256(uint24(ticks[i])), "-> Price:", price);
+            console.log("Tick", uint256(uint24(ticks[i])));
+            console.log("-> Price:", price);
             
             // Convert back
             int24 backToTick = builder.priceToTick(price);
-            console.log("Price", price, "-> Tick:", uint256(uint24(backToTick)));
+            console.log("Price", price);
+            console.log("-> Tick:", uint256(uint24(backToTick)));
         }
     }
 
@@ -505,13 +511,15 @@ contract ConcentratedAMMTest is Test, IConcentratedAMMCallback {
         token0.approve(address(amm), swapAmount);
 
         uint256 token1Out = amm.swapExactIn(strategy, true, swapAmount, 0, address(this), "");
-        console.log("Swap 0->1: Input", swapAmount, "Output", token1Out);
+        console.log("Swap 0->1 Input:", swapAmount);
+        console.log("Swap 0->1 Output:", token1Out);
 
         // Swap token1 -> token0
         token1.approve(address(amm), token1Out);
 
         uint256 token0Out = amm.swapExactIn(strategy, false, token1Out, 0, address(this), "");
-        console.log("Swap 1->0: Input", token1Out, "Output", token0Out);
+        console.log("Swap 1->0 Input:", token1Out);
+        console.log("Swap 1->0 Output:", token0Out);
 
         assertTrue(token0Out < swapAmount, "Should lose value to fees after round trip");
         console.log("Loss from fees:", swapAmount - token0Out);
@@ -556,13 +564,13 @@ contract ConcentratedAMMTest is Test, IConcentratedAMMCallback {
         address /* tokenOut */,
         uint256 amountIn,
         uint256 /* amountOut */,
-        address maker,
+        address _maker,
         address app,
         bytes32 strategyHash,
         bytes calldata /* takerData */
     ) external override {
         // Transfer input tokens to maker via Aqua
         IERC20(tokenIn).approve(address(aqua), amountIn);
-        aqua.push(maker, app, strategyHash, tokenIn, amountIn);
+        aqua.push(_maker, app, strategyHash, tokenIn, amountIn);
     }
 }
