@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Complete Deployment Script for All AMM Systems
-# This script deploys Concentrated AMM, Pseudo-Arbitrage AMM, and Cross-AMM Arbitrage
+# This script deploys Concentrated AMM and Pseudo-Arbitrage AMM
 
 set -e  # Exit on error
 
@@ -48,7 +48,7 @@ echo ""
 
 # Step 1: Deploy Concentrated AMM
 echo "=========================================="
-echo "Step 1/3: Deploying Concentrated AMM"
+echo "Step 1/2: Deploying Concentrated AMM"
 echo "=========================================="
 echo ""
 
@@ -108,7 +108,7 @@ echo ""
 
 # Step 2: Deploy Pseudo-Arbitrage AMM
 echo "=========================================="
-echo "Step 2/3: Deploying Pseudo-Arbitrage AMM"
+echo "Step 2/2: Deploying Pseudo-Arbitrage AMM"
 echo "=========================================="
 echo ""
 
@@ -162,45 +162,6 @@ fi
 cd "$ROOT_DIR"
 echo ""
 
-# Step 3: Deploy Cross-AMM Arbitrage
-echo "=========================================="
-echo "Step 3/3: Deploying Cross-AMM Arbitrage"
-echo "=========================================="
-echo ""
-
-cd packages/cross-amm-arbitrage
-
-echo "Note: Using simplified deployment with existing contracts..."
-echo ""
-
-# Export the Aqua address from previous deployment for the script to use
-export AQUA_ADDRESS=${AQUA_ADDRESS}
-
-echo "Deploying arbitrage system (using Aqua at ${AQUA_ADDRESS})..."
-forge script DeployCrossAMMArbitrageSimple.s.sol:DeployCrossAMMArbitrageSimple \
-    --rpc-url $RPC_URL \
-    --broadcast \
-    --skip test \
-    ${ETHERSCAN_API_KEY:+--verify} \
-    2>&1 | tee ../../deployments/cross-amm-deployment.log
-
-# Extract addresses from deployment
-if [ -f "./deployments/cross-amm-arbitrage-latest.json" ]; then
-    echo -e "${GREEN}✓ Cross-AMM Arbitrage deployed successfully${NC}"
-    cat ./deployments/cross-amm-arbitrage-latest.json
-    
-    export BOT_ADDRESS=$(jq -r '.crossAMMArbitrageBot' ./deployments/cross-amm-arbitrage-latest.json)
-    export ARBITRAGE_ADDRESS=$(jq -r '.crossAMMArbitrage' ./deployments/cross-amm-arbitrage-latest.json)
-    
-    cp ./deployments/cross-amm-arbitrage-latest.json ../../deployments/
-else
-    echo -e "${RED}✗ Failed to deploy Cross-AMM Arbitrage${NC}"
-    exit 1
-fi
-
-cd ../..
-echo ""
-
 # Create comprehensive deployment summary
 echo "=========================================="
 echo "  DEPLOYMENT COMPLETE"
@@ -215,8 +176,7 @@ cat > deployments/deployment-summary.json <<EOF
     "aqua": "${AQUA_ADDRESS}",
     "concentratedAMM": "${CONCENTRATED_AMM_ADDRESS}",
     "concentratedBuilder": "${CONCENTRATED_BUILDER_ADDRESS}",
-    "crossAMMArbitrage": "${ARBITRAGE_ADDRESS}",
-    "crossAMMArbitrageBot": "${BOT_ADDRESS}"
+    "pseudoArbitrageAMM": "${PSEUDO_ARB_AMM_ADDRESS}"
   }
 }
 EOF
@@ -233,8 +193,7 @@ cat > .env.deployed <<EOF
 AQUA_ADDRESS=${AQUA_ADDRESS}
 CONCENTRATED_AMM_ADDRESS=${CONCENTRATED_AMM_ADDRESS}
 CONCENTRATED_BUILDER_ADDRESS=${CONCENTRATED_BUILDER_ADDRESS}
-ARBITRAGE_ADDRESS=${ARBITRAGE_ADDRESS}
-BOT_ADDRESS=${BOT_ADDRESS}
+PSEUDO_ARB_AMM_ADDRESS=${PSEUDO_ARB_AMM_ADDRESS}
 EOF
 
 echo -e "${GREEN}Deployment addresses saved to:${NC}"
@@ -248,17 +207,13 @@ echo "  NEXT STEPS"
 echo "=========================================="
 echo ""
 echo "1. Verify contracts on block explorer (if not auto-verified)"
-echo "2. Fund the arbitrage bot:"
-echo "   cast send $BOT_ADDRESS \"depositCapital(address,uint256)\" \$TOKEN_X 1000000000000000000000 --rpc-url \$RPC_URL --private-key \$PRIVATE_KEY"
+echo "2. Create liquidity positions:"
+echo "   cd packages/concentrated-amm"
+echo "   forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition --rpc-url \$RPC_URL --broadcast"
 echo ""
-echo "3. Configure bot parameters:"
-echo "   cast send $BOT_ADDRESS \"setMinProfitBps(uint256)\" 50 --rpc-url \$RPC_URL --private-key \$PRIVATE_KEY"
+echo "3. Test swaps on both AMMs"
 echo ""
-echo "4. Start monitoring:"
-echo "   forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities --rpc-url \$RPC_URL"
-echo ""
-echo "5. Run the bot:"
-echo "   node scripts/monitor.js"
+echo "4. Monitor liquidity and positions"
 echo ""
 echo -e "${GREEN}Deployment successful! 🚀${NC}"
 

@@ -1,17 +1,20 @@
 {
-  "name": "amm-arbitrage-system",
+  "name": "amm-system",
   "version": "1.0.0",
-  "description": "Cross-AMM Arbitrage Bot for Concentrated and Pseudo-Arbitrage AMMs",
+  "description": "AMM System with Concentrated and Pseudo-Arbitrage AMMs",
   "main": "scripts/monitor.js",
   "scripts": {
     "monitor": "node scripts/monitor.js",
     "start": "npm run monitor",
-    "test": "forge test"
+    "test": "forge test",
+    "test:liquidity": "ts-node scripts/test-liquidity.ts",
+    "test:pyth": "ts-node scripts/test-pyth-adapter.ts",
+    "test:all": "npm run test:liquidity && npm run test:pyth"
   },
   "keywords": [
     "defi",
     "amm",
-    "arbitrage",
+    "liquidity",
     "ethereum",
     "smart-contracts"
   ],
@@ -21,7 +24,11 @@
     "ethers": "^5.7.2",
     "dotenv": "^16.3.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
   "engines": {
     "node": ">=14.0.0"
   }

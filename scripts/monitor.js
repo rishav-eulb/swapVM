@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Cross-AMM Arbitrage Bot Monitor
+ * AMM System Monitor
  * 
- * This script continuously monitors for arbitrage opportunities
- * and executes them when profitable.
+ * This script monitors the deployed AMM contracts for activity,
+ * liquidity levels, and overall system health.
  */
 
 const { ethers } = require('ethers');
@@ -13,16 +13,17 @@ require('dotenv').config();
 // Configuration
 const RPC_URL = process.env.RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const BOT_ADDRESS = process.env.BOT_ADDRESS;
+const CONCENTRATED_AMM_ADDRESS = process.env.CONCENTRATED_AMM_ADDRESS;
+const PSEUDO_ARB_AMM_ADDRESS = process.env.PSEUDO_ARB_AMM_ADDRESS;
 const MONITORING_INTERVAL = parseInt(process.env.MONITORING_INTERVAL || '30') * 1000;
 
-// Bot ABI (minimal interface)
-const BOT_ABI = [
-    "function checkForOpportunities() external view returns (bool hasOpportunities, uint256 bestProfit)",
-    "function scanAllStrategies() external returns (bool executed, uint256 profit)",
-    "function getPerformanceStats(address token) external view returns (tuple(uint256 totalExecutions, uint256 totalProfit, uint256 totalGasUsed, uint256 lastExecutionTime, uint256 largestProfit))",
-    "function getCapitalStatus(address token) external view returns (uint256 available, uint256 maxPerArbitrage, uint256 utilization)",
-    "event ArbitrageExecuted(address indexed token0, address indexed token1, uint256 amountIn, uint256 profit, uint256 gasUsed, uint256 priceDiscrepancy)"
+// AMM ABI (minimal interface)
+const AMM_ABI = [
+    "function getTotalLiquidity() external view returns (uint256)",
+    "function getCurrentPrice() external view returns (uint256)",
+    "function aqua() external view returns (address)",
+    "event Swap(address indexed sender, address indexed recipient, uint256 amount0, uint256 amount1)",
+    "event LiquidityAdded(address indexed provider, uint256 amount0, uint256 amount1)"
 ];
 
 // Validation
@@ -36,24 +37,28 @@ if (!PRIVATE_KEY) {
     process.exit(1);
 }
 
-if (!BOT_ADDRESS) {
-    console.error('Error: BOT_ADDRESS not set in .env file');
+if (!CONCENTRATED_AMM_ADDRESS && !PSEUDO_ARB_AMM_ADDRESS) {
+    console.error('Error: No AMM addresses set in .env file');
     console.log('Please deploy the contracts first using: ./deploy-all.sh');
+    console.log('Then run: source .env.deployed');
     process.exit(1);
 }
 
 // Setup provider and wallet
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const bot = new ethers.Contract(BOT_ADDRESS, BOT_ABI, wallet);
+
+// Setup contracts
+const concentratedAMM = CONCENTRATED_AMM_ADDRESS ? 
+    new ethers.Contract(CONCENTRATED_AMM_ADDRESS, AMM_ABI, provider) : null;
+const pseudoArbAMM = PSEUDO_ARB_AMM_ADDRESS ? 
+    new ethers.Contract(PSEUDO_ARB_AMM_ADDRESS, AMM_ABI, provider) : null;
 
 // Statistics
 let stats = {
     checksPerformed: 0,
-    opportunitiesFound: 0,
-    executionsSuccessful: 0,
-    executionsFailed: 0,
-    totalProfit: ethers.BigNumber.from(0),
+    swapsDetected: 0,
+    liquidityEvents: 0,
     startTime: Date.now()
 };
 
@@ -84,80 +89,60 @@ function displayStats() {
     const runtime = Date.now() - stats.startTime;
     
     console.log('\n' + '='.repeat(60));
-    console.log('BOT STATISTICS');
+    console.log('AMM MONITORING STATISTICS');
     console.log('='.repeat(60));
     console.log(`Runtime:              ${formatDuration(runtime)}`);
     console.log(`Checks Performed:     ${stats.checksPerformed}`);
-    console.log(`Opportunities Found:  ${stats.opportunitiesFound}`);
-    console.log(`Executions Success:   ${stats.executionsSuccessful}`);
-    console.log(`Executions Failed:    ${stats.executionsFailed}`);
-    console.log(`Total Profit:         ${formatAmount(stats.totalProfit)} tokens`);
-    
-    if (stats.executionsSuccessful > 0) {
-        const avgProfit = stats.totalProfit.div(stats.executionsSuccessful);
-        console.log(`Average Profit:       ${formatAmount(avgProfit)} tokens`);
-    }
-    
+    console.log(`Swaps Detected:       ${stats.swapsDetected}`);
+    console.log(`Liquidity Events:     ${stats.liquidityEvents}`);
     console.log('='.repeat(60) + '\n');
 }
 
 /**
- * Monitor and execute arbitrage
+ * Monitor AMM status
  */
-async function monitorAndExecute() {
+async function monitorAMMs() {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] Checking for opportunities...`);
+    console.log(`[${timestamp}] Checking AMM status...`);
     
     stats.checksPerformed++;
     
     try {
-        // Check for opportunities
-        const [hasOpportunities, estimatedProfit] = await bot.checkForOpportunities();
-        
-        if (hasOpportunities) {
-            stats.opportunitiesFound++;
-            
-            console.log(`✓ Opportunity detected!`);
-            console.log(`  Estimated Profit: ${formatAmount(estimatedProfit)} tokens`);
-            
-            // Execute arbitrage
-            console.log(`  Executing arbitrage...`);
-            const tx = await bot.scanAllStrategies();
-            const receipt = await tx.wait();
-            
-            // Parse events to get actual profit
-            const event = receipt.events?.find(e => e.event === 'ArbitrageExecuted');
-            const actualProfit = event?.args?.profit || ethers.BigNumber.from(0);
-            
-            stats.executionsSuccessful++;
-            stats.totalProfit = stats.totalProfit.add(actualProfit);
-            
-            console.log(`  ✓ Arbitrage executed successfully!`);
-            console.log(`  Actual Profit: ${formatAmount(actualProfit)} tokens`);
-            console.log(`  Gas Used: ${receipt.gasUsed.toString()}`);
-            console.log(`  Transaction: ${receipt.transactionHash}`);
-            
-            // Display updated stats
-            displayStats();
-        } else {
-            console.log(`  No profitable opportunities at this time`);
-            
-            // Display brief status every 10 checks
-            if (stats.checksPerformed % 10 === 0) {
-                console.log(`  [${stats.checksPerformed} checks, ${stats.opportunitiesFound} opportunities found]`);
+        // Check Concentrated AMM
+        if (concentratedAMM) {
+            console.log('\nConcentrated AMM:');
+            try {
+                const liquidity = await concentratedAMM.getTotalLiquidity();
+                console.log(`  Total Liquidity: ${formatAmount(liquidity)} tokens`);
+                
+                const aqua = await concentratedAMM.aqua();
+                console.log(`  Aqua Address: ${aqua}`);
+            } catch (err) {
+                console.log(`  Status: ${err.message}`);
             }
         }
-    } catch (error) {
-        stats.executionsFailed++;
         
-        console.error(`✗ Error:`, error.message);
-        
-        // Try to extract revert reason
-        if (error.error && error.error.message) {
-            console.error(`  Reason: ${error.error.message}`);
+        // Check Pseudo-Arbitrage AMM
+        if (pseudoArbAMM) {
+            console.log('\nPseudo-Arbitrage AMM:');
+            try {
+                const price = await pseudoArbAMM.getCurrentPrice();
+                console.log(`  Current Price: ${formatAmount(price, 8)}`);
+                
+                const aqua = await pseudoArbAMM.aqua();
+                console.log(`  Aqua Address: ${aqua}`);
+            } catch (err) {
+                console.log(`  Status: ${err.message}`);
+            }
         }
         
-        // Don't exit on errors, just log and continue
+        // Display brief status every 10 checks
+        if (stats.checksPerformed % 10 === 0) {
+            console.log(`\n[${stats.checksPerformed} checks completed]`);
+        }
+        
+    } catch (error) {
+        console.error(`✗ Error:`, error.message);
         console.log(`  Continuing monitoring...`);
     }
 }
@@ -167,28 +152,33 @@ async function monitorAndExecute() {
  */
 async function main() {
     console.log('='.repeat(60));
-    console.log('CROSS-AMM ARBITRAGE BOT');
+    console.log('AMM SYSTEM MONITOR');
     console.log('='.repeat(60));
-    console.log(`Network:         ${RPC_URL}`);
-    console.log(`Bot Address:     ${BOT_ADDRESS}`);
-    console.log(`Monitor Address: ${wallet.address}`);
-    console.log(`Check Interval:  ${MONITORING_INTERVAL / 1000}s`);
+    console.log(`Network:              ${RPC_URL}`);
+    if (CONCENTRATED_AMM_ADDRESS) {
+        console.log(`Concentrated AMM:     ${CONCENTRATED_AMM_ADDRESS}`);
+    }
+    if (PSEUDO_ARB_AMM_ADDRESS) {
+        console.log(`Pseudo-Arb AMM:       ${PSEUDO_ARB_AMM_ADDRESS}`);
+    }
+    console.log(`Check Interval:       ${MONITORING_INTERVAL / 1000}s`);
     console.log('='.repeat(60));
     console.log('\nStarting monitoring...\n');
     
-    // Get initial bot status
+    // Get initial wallet status
     try {
         const balance = await provider.getBalance(wallet.address);
+        console.log(`Monitor Wallet: ${wallet.address}`);
         console.log(`Wallet Balance: ${formatAmount(balance)} ETH\n`);
     } catch (error) {
         console.log('Could not fetch wallet balance\n');
     }
     
     // Run initial check immediately
-    await monitorAndExecute();
+    await monitorAMMs();
     
     // Then run on interval
-    setInterval(monitorAndExecute, MONITORING_INTERVAL);
+    setInterval(monitorAMMs, MONITORING_INTERVAL);
     
     // Display stats every 5 minutes
     setInterval(displayStats, 5 * 60 * 1000);

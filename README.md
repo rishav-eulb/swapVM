@@ -1,10 +1,9 @@
-# AMM Arbitrage System
+# AMM System
 
-A complete DeFi ecosystem featuring three production-ready AMM implementations:
+A complete DeFi ecosystem featuring two production-ready AMM implementations:
 
 1. **Pseudo-Arbitrage AMM** - Oracle-based AMM that eliminates impermanent loss
 2. **Concentrated AMM** - Tick-based concentrated liquidity (Uniswap V3 style)
-3. **Cross-AMM Arbitrage** - Automated bot that captures profit from price discrepancies
 
 ---
 
@@ -18,10 +17,9 @@ nano .env  # Add PRIVATE_KEY and RPC_URL
 # 2. Deploy
 ./deploy-all.sh
 
-# 3. Fund & Run Bot
-source .env.deployed
-npm install
-node scripts/monitor.js
+# 3. Create Liquidity Positions
+cd packages/concentrated-amm
+forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition --rpc-url $RPC_URL --broadcast
 ```
 
 **See [QUICK_START.md](./QUICK_START.md) for detailed instructions.**
@@ -35,9 +33,8 @@ node scripts/monitor.js
 - **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Complete deployment guide
 
 ### Individual AMMs
-- **[Pseudo-Arbitrage AMM](./files/pseudo-arbitrage-amm/README.md)** - Oracle-based AMM
-- **[Concentrated AMM](./files/concentrated-amm/README.md)** - Tick-based liquidity
-- **[Cross-AMM Arbitrage](./files/cross-amm-arbitrage/MASTER_README.md)** - Arbitrage system
+- **[Pseudo-Arbitrage AMM](./packages/pseudo-arbitrage-amm/README.md)** - Oracle-based AMM
+- **[Concentrated AMM](./packages/concentrated-amm/README.md)** - Tick-based liquidity
 
 ---
 
@@ -45,35 +42,21 @@ node scripts/monitor.js
 
 ### How It Works
 
-```
-┌─────────────────────┐         ┌──────────────────────┐
-│  ConcentratedAMM    │         │ PseudoArbitrageAMM   │
-│  (Manual Pricing)   │         │  (Oracle Pricing)    │
-│                     │         │                      │
-│  Price: 2.0 (stale) │         │  Price: 2.2 (updated)│
-└──────────┬──────────┘         └──────────┬───────────┘
-           │                               │
-           │    Price Discrepancy: 10%     │
-           └───────────┬───────────────────┘
-                       │
-           ┌───────────▼──────────┐
-           │  CrossAMMArbitrage   │
-           │                      │
-           │  1. Detects Gap      │
-           │  2. Buys at 2.0     │
-           │  3. Sells at 2.2    │
-           │  4. Profit: 10%     │
-           └──────────────────────┘
-```
+The system provides two complementary AMM approaches:
 
-### The Opportunity
+**ConcentratedAMM (Manual Pricing)**
+- Liquidity providers set price ranges via ticks
+- High capital efficiency (up to 4000x)
+- Full control over position ranges
+- Suitable for professional market makers
 
-**ConcentratedAMM** makers set prices manually via ticks. When markets move:
-- ✅ Oracle updates → PseudoArbitrageAMM has current prices
-- ❌ Manual updates lag → ConcentratedAMM has stale prices
-- 💰 **Arbitrage window opens** (minutes to hours)
+**PseudoArbitrageAMM (Oracle Pricing)**
+- Automatic pricing via Pyth Network oracles
+- Eliminates impermanent loss
+- Always reflects current market prices
+- Ideal for passive liquidity providers
 
-The bot automatically captures this profit before makers can rebalance.
+Both AMMs share the same Aqua liquidity layer, enabling seamless interoperability.
 
 ---
 
@@ -90,25 +73,22 @@ The bot automatically captures this profit before makers can rebalance.
 - ✅ Tick-based price ranges
 - ✅ Aqua shared liquidity layer
 - ✅ Maker keeps custody of tokens
-
-### Cross-AMM Arbitrage
-- ✅ Automatic opportunity detection
-- ✅ Optimal amount calculation
-- ✅ Multi-strategy monitoring
-- ✅ Flash arbitrage pattern
-- ✅ Automated bot included
+- ✅ Professional market making tools
 
 ---
 
-## 📊 Expected Performance
+## 📊 Key Benefits
 
-| Volatility | Opportunities/Day | Avg Profit | Daily Return |
-|-----------|------------------|------------|--------------|
-| High      | 20-30            | 2-5%       | 40-150%      |
-| Medium    | 10-20            | 1-3%       | 10-60%       |
-| Low       | 3-10             | 0.5-1%     | 1.5-10%      |
+**For Liquidity Providers:**
+- Choose between manual control (Concentrated) or automated pricing (Pseudo-Arbitrage)
+- Maximize capital efficiency with concentrated liquidity
+- Eliminate impermanent loss with oracle-based pricing
+- Maintain custody of tokens
 
-*Returns on capital deployed. Actual results may vary based on market conditions.*
+**For Traders:**
+- Access deep liquidity across both AMMs
+- Benefit from competitive pricing
+- Execute large trades with minimal slippage
 
 ---
 
@@ -139,25 +119,17 @@ swap_vm/
 ├── DEPLOYMENT_GUIDE.md          # Complete deployment docs
 ├── .env.example                 # Environment template
 │
-├── files/
+├── packages/
 │   ├── pseudo-arbitrage-amm/   # Oracle-based AMM
 │   │   ├── src/                # Solidity contracts
 │   │   ├── test/               # Test suite
 │   │   └── docs/               # Documentation
 │   │
-│   ├── concentrated-amm/        # Tick-based AMM
-│   │   ├── src/                # Solidity contracts
-│   │   ├── script/             # Deployment scripts
-│   │   ├── test/               # Test suite
-│   │   └── docs/               # Documentation
-│   │
-│   └── cross-amm-arbitrage/     # Arbitrage system
-│       ├── CrossAMMArbitrage.sol      # Core arbitrage
-│       ├── CrossAMMArbitrageBot.sol   # Automated bot
+│   └── concentrated-amm/        # Tick-based AMM
+│       ├── src/                # Solidity contracts
+│       ├── script/             # Deployment scripts
+│       ├── test/               # Test suite
 │       └── docs/               # Documentation
-│
-├── scripts/
-│   └── monitor.js              # Monitoring bot
 │
 └── deployments/                # Deployment records
 ```
@@ -191,36 +163,26 @@ export RPC_URL=https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY
 
 ---
 
-## 🤖 Running the Bot
+## 💼 Using the AMMs
 
-### Automated Monitoring
+### Create Liquidity Positions
 
+**Concentrated AMM (Manual Price Ranges):**
 ```bash
-# Install dependencies
-npm install
+cd packages/concentrated-amm
 
-# Load deployment addresses
-source .env.deployed
-
-# Run bot
-npm start
+# Create a position
+forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
+    --rpc-url $RPC_URL \
+    --broadcast
 ```
 
-The bot will:
-- ✅ Check for opportunities every 30 seconds
-- ✅ Execute profitable arbitrages automatically
-- ✅ Track performance metrics
-- ✅ Display real-time statistics
-
-### Manual Execution
-
+**Pseudo-Arbitrage AMM (Oracle-Based):**
 ```bash
-# Check opportunities
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities \
-    --rpc-url $RPC_URL
+cd packages/pseudo-arbitrage-amm
 
-# Execute if found
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:ExecuteArbitrage \
+# Deploy a strategy
+forge script script/DeployPseudoArbitrageAMM.s.sol \
     --rpc-url $RPC_URL \
     --broadcast
 ```
@@ -229,22 +191,19 @@ forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:ExecuteArbi
 
 ## 📊 Monitoring
 
-### Check Bot Status
+### Check Deployment Status
 
 ```bash
 source .env.deployed
 
-# Performance stats
-cast call $BOT_ADDRESS \
-    "getPerformanceStats(address)" \
-    $TOKEN_X \
-    --rpc-url $RPC_URL
+# View deployment summary
+cat deployments/deployment-summary.json
 
-# Capital status
-cast call $BOT_ADDRESS \
-    "getCapitalStatus(address)" \
-    $TOKEN_X \
-    --rpc-url $RPC_URL
+# Check Concentrated AMM
+cast call $CONCENTRATED_AMM_ADDRESS "aqua()" --rpc-url $RPC_URL
+
+# Check Pseudo-Arbitrage AMM
+cast call $PSEUDO_ARB_AMM_ADDRESS "aqua()" --rpc-url $RPC_URL
 ```
 
 ### View Logs
@@ -255,9 +214,6 @@ cat deployments/*-deployment.log
 
 # Test reports
 cat deployments/*-test-report.txt
-
-# Deployment summary
-cat deployments/deployment-summary.json
 ```
 
 ---
@@ -268,19 +224,16 @@ cat deployments/deployment-summary.json
 
 ```bash
 # Concentrated AMM
-cd files/concentrated-amm && forge test -vv
+cd packages/concentrated-amm && forge test -vv
 
 # Pseudo-Arbitrage AMM
-cd files/pseudo-arbitrage-amm && forge test -vv
-
-# Cross-AMM Arbitrage
-cd files/cross-amm-arbitrage && forge test -vv
+cd packages/pseudo-arbitrage-amm && forge test -vv
 ```
 
 ### Create Test Position
 
 ```bash
-cd files/concentrated-amm
+cd packages/concentrated-amm
 
 forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
     --rpc-url $RPC_URL \
@@ -291,22 +244,18 @@ forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
 
 ## ⚙️ Configuration
 
-### Bot Parameters
+### AMM Parameters
 
 ```bash
 source .env.deployed
 
-# Minimum profit threshold (0.5%)
-cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 50 \
+# Configure Concentrated AMM fee tier
+cast send $CONCENTRATED_AMM_ADDRESS "setFeeTier(uint24)" 3000 \
     --rpc-url $RPC_URL --private-key $PRIVATE_KEY
 
-# Minimum discrepancy (1%)
-cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 100 \
-    --rpc-url $RPC_URL --private-key $PRIVATE_KEY
-
-# Max capital per trade
-cast send $BOT_ADDRESS "setMaxCapitalPerArbitrage(address,uint256)" \
-    $TOKEN_X 100000000000000000000 \
+# Update oracle for Pseudo-Arbitrage AMM
+cast send $PSEUDO_ARB_AMM_ADDRESS "updateOracle(address)" \
+    $NEW_ORACLE_ADDRESS \
     --rpc-url $RPC_URL --private-key $PRIVATE_KEY
 ```
 
@@ -358,20 +307,21 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for more troubleshooting.
 
 ---
 
-## 📈 Performance Tuning
+## 📈 Optimizing Liquidity
 
-### Aggressive Strategy
+### Concentrated AMM - Tight Ranges
 ```bash
-# Lower thresholds for more trades
-cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 25 ...
-cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 50 ...
+# Create focused liquidity for higher fees
+# Lower tick = lower price, Upper tick = higher price
+forge script script/DeployConcentratedAMM.s.sol:CreateTightPosition \
+    --rpc-url $RPC_URL --broadcast
 ```
 
-### Conservative Strategy
+### Pseudo-Arbitrage AMM - Oracle Updates
 ```bash
-# Higher thresholds for safer trades
-cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 100 ...
-cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 200 ...
+# Ensure oracle is frequently updated for best pricing
+# Check oracle freshness
+cast call $ORACLE_ADDRESS "latestRoundData()" --rpc-url $RPC_URL
 ```
 
 ---
@@ -380,8 +330,7 @@ cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 200 ...
 
 See individual component licenses:
 - Concentrated AMM: `LicenseRef-Degensoft-Aqua-Source-1.1`
-- Pseudo-Arbitrage: `LicenseRef-Degensoft-SwapVM-1.1`
-- Cross-AMM Arbitrage: `LicenseRef-Degensoft-Aqua-Source-1.1`
+- Pseudo-Arbitrage AMM: `LicenseRef-Degensoft-SwapVM-1.1`
 
 For licensing inquiries:
 - license@degensoft.com
@@ -408,19 +357,18 @@ For licensing inquiries:
 1. Read [QUICK_START.md](./QUICK_START.md) for 10-minute setup
 2. Or [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for comprehensive guide
 3. Deploy to testnet first
-4. Fund the bot
-5. Start monitoring
+4. Create liquidity positions
+5. Start trading
 
-**Happy Trading! 🚀**
+**Happy Building! 🚀**
 
 ---
 
 ## 📊 Stats
 
-- **10,000+** lines of production Solidity code
-- **100KB+** comprehensive documentation
-- **25+** test scenarios
-- **3** production-ready AMM implementations
-- **1** automated arbitrage bot
+- **8,000+** lines of production Solidity code
+- **80KB+** comprehensive documentation
+- **20+** test scenarios
+- **2** production-ready AMM implementations
 
 All tested, documented, and ready for deployment!

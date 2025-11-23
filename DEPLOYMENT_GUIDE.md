@@ -1,6 +1,6 @@
 # Complete Deployment Guide
 
-This guide walks you through deploying all three AMM systems: Pseudo-Arbitrage AMM, Concentrated AMM, and Cross-AMM Arbitrage.
+This guide walks you through deploying both AMM systems: Pseudo-Arbitrage AMM and Concentrated AMM.
 
 ---
 
@@ -17,9 +17,8 @@ foundryup
 cd /Users/rj39/Desktop/NexusNetwork/swap_vm
 
 # Install dependencies for each project
-cd files/pseudo-arbitrage-amm && forge install
+cd packages/pseudo-arbitrage-amm && forge install
 cd ../concentrated-amm && forge install
-cd ../cross-amm-arbitrage && forge install
 ```
 
 ### 2. Setup Environment Variables
@@ -69,9 +68,8 @@ Deploy everything in one command:
 This will:
 1. Deploy or use existing Aqua
 2. Deploy ConcentratedAMM + Builder
-3. Deploy PseudoArbitrageAMM + Router
-4. Deploy CrossAMMArbitrage + Bot
-5. Save all addresses to `deployments/`
+3. Deploy PseudoArbitrageAMM
+4. Save all addresses to `deployments/`
 
 ### Option B: Step-by-Step Deploy (Recommended)
 
@@ -84,7 +82,7 @@ Deploy each system individually for more control.
 ### Step 1: Deploy Concentrated AMM
 
 ```bash
-cd files/concentrated-amm
+cd packages/concentrated-amm
 
 # Build contracts
 forge build
@@ -138,28 +136,6 @@ forge script lib/swap-vm/script/DeployAquaSwapVMRouter.s.sol \
 **Important:** This uses the same Aqua instance as ConcentratedAMM.
 
 ---
-
-### Step 3: Deploy Cross-AMM Arbitrage
-
-```bash
-cd ../cross-amm-arbitrage
-
-# Build contracts
-forge build
-
-# Run tests
-forge test -vv
-
-# Deploy arbitrage system
-forge script DeployCrossAMMArbitrage.s.sol:DeployCrossAMMArbitrage \
-    --rpc-url $RPC_URL \
-    --broadcast \
-    --verify
-```
-
-**What Gets Deployed:**
-- ✅ CrossAMMArbitrage
-- ✅ CrossAMMArbitrageBot
 
 ---
 
@@ -216,12 +192,10 @@ forge script script/DeployAll.s.sol \
 ### 1. Check Contract Addresses
 
 ```bash
-# Concentrated AMM
-forge script files/concentrated-amm/script/DeployConcentratedAMM.s.sol:VerifyDeployment \
-    --rpc-url $RPC_URL
-
 # View saved addresses
 cat deployments/concentrated-amm-latest.json
+cat deployments/pseudo-arbitrage-amm-latest.json
+cat deployments/deployment-summary.json
 ```
 
 ### 2. Run Integration Tests
@@ -232,181 +206,135 @@ export BUILDER_ADDRESS=<from deployment>
 export TOKEN0_ADDRESS=<your token>
 export TOKEN1_ADDRESS=<your token>
 
-forge script files/concentrated-amm/script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
+forge script packages/concentrated-amm/script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
     --rpc-url $RPC_URL \
     --broadcast
 ```
 
-### 3. Check Arbitrage Bot Status
+### 3. Verify Contracts on Block Explorer
 
 ```bash
-export BOT_ADDRESS=<from deployment>
-export TOKEN_X=<your token>
-
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities \
-    --rpc-url $RPC_URL
+# Check contracts are verified
+cast code $CONCENTRATED_AMM_ADDRESS --rpc-url $RPC_URL
+cast code $PSEUDO_ARB_AMM_ADDRESS --rpc-url $RPC_URL
 ```
 
 ---
 
 ## 🎮 Post-Deployment Setup
 
-### 1. Fund the Arbitrage Bot
+### 1. Create Liquidity Positions
 
+**Concentrated AMM:**
 ```bash
-# Set bot address
-export BOT_ADDRESS=0x...
+cd packages/concentrated-amm
 
-# Run setup script
-node scripts/fundBot.js
+# Create a concentrated liquidity position
+forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
+    --rpc-url $RPC_URL \
+    --broadcast
 ```
 
-Or manually via Foundry:
+**Pseudo-Arbitrage AMM:**
 ```bash
-cast send $BOT_ADDRESS \
-    "depositCapital(address,uint256)" \
-    $TOKEN_X \
-    1000000000000000000000 \  # 1000 tokens (adjust decimals)
+cd packages/pseudo-arbitrage-amm
+
+# Deploy strategies with oracle pricing
+forge script script/DeployPseudoArbitrageAMM.s.sol \
     --rpc-url $RPC_URL \
-    --private-key $PRIVATE_KEY
+    --broadcast
 ```
 
-### 2. Configure Bot Parameters
+### 2. Configure AMM Parameters
 
 ```bash
-# Set minimum profit threshold (0.5% = 50 bps)
-cast send $BOT_ADDRESS \
-    "setMinProfitBps(uint256)" \
-    50 \
+# Set fee tier for Concentrated AMM (0.3% = 3000)
+cast send $CONCENTRATED_AMM_ADDRESS \
+    "setFeeTier(uint24)" \
+    3000 \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
 
-# Set minimum discrepancy (1% = 100 bps)
-cast send $BOT_ADDRESS \
-    "setMinDiscrepancyBps(uint256)" \
-    100 \
-    --rpc-url $RPC_URL \
-    --private-key $PRIVATE_KEY
-
-# Set max capital per arbitrage
-cast send $BOT_ADDRESS \
-    "setMaxCapitalPerArbitrage(address,uint256)" \
-    $TOKEN_X \
-    100000000000000000000 \  # 100 tokens
+# Update oracle for Pseudo-Arbitrage AMM
+cast send $PSEUDO_ARB_AMM_ADDRESS \
+    "updateOracle(address)" \
+    $ORACLE_ADDRESS \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
 ```
 
-### 3. Add Authorized Executors
+### 3. Test Swaps
 
 ```bash
-# Add your keeper/bot address
-cast send $BOT_ADDRESS \
-    "setExecutor(address,bool)" \
-    0xYourKeeperAddress \
-    true \
+# Test swap on Concentrated AMM
+cast send $CONCENTRATED_AMM_ADDRESS \
+    "swap(address,address,uint256,uint256,address)" \
+    $TOKEN0 $TOKEN1 1000000000000000000 0 $YOUR_ADDRESS \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
 ```
 
 ---
 
-## 🤖 Running the Arbitrage Bot
+## 💼 Using the AMMs
 
-### Option 1: Automated Monitoring (Recommended)
-
-Create a monitoring script (`scripts/monitor.js`):
-
-```javascript
-const { ethers } = require('ethers');
-
-const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-
-const botAddress = process.env.BOT_ADDRESS;
-const botABI = [...]; // Load from artifacts
-
-const bot = new ethers.Contract(botAddress, botABI, wallet);
-
-async function monitorAndExecute() {
-    console.log('Checking for opportunities...');
-    
-    try {
-        // Check if opportunities exist
-        const [hasOpp, profit] = await bot.checkForOpportunities();
-        
-        if (hasOpp) {
-            console.log(`Opportunity found! Estimated profit: ${profit}`);
-            
-            // Execute
-            const tx = await bot.scanAllStrategies();
-            const receipt = await tx.wait();
-            
-            console.log(`Executed! Gas used: ${receipt.gasUsed}`);
-            console.log(`Transaction: ${receipt.transactionHash}`);
-        } else {
-            console.log('No opportunities at this time');
-        }
-    } catch (error) {
-        console.error('Error:', error.message);
-    }
-}
-
-// Run every 30 seconds
-setInterval(monitorAndExecute, 30000);
-```
-
-Run it:
-```bash
-node scripts/monitor.js
-```
-
-### Option 2: Manual Execution
+### Trading on Concentrated AMM
 
 ```bash
-# Check for opportunities
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities \
-    --rpc-url $RPC_URL
+# Execute a swap
+cast send $CONCENTRATED_AMM_ADDRESS \
+    "swap(address,address,uint256,uint256,address)" \
+    $TOKEN0 $TOKEN1 $AMOUNT_IN 0 $RECIPIENT \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY
+```
 
-# Execute if found
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:ExecuteArbitrage \
+### Adding Liquidity
+
+```bash
+# Add concentrated liquidity
+forge script packages/concentrated-amm/script/DeployConcentratedAMM.s.sol:AddLiquidity \
     --rpc-url $RPC_URL \
     --broadcast
 ```
 
-### Option 3: Use Gelato Network (Automated)
+### Monitoring Positions
 
-Deploy a Gelato resolver for fully automated execution without maintaining infrastructure.
+```bash
+# Check position status
+cast call $CONCENTRATED_AMM_ADDRESS \
+    "getPosition(address,int24,int24)" \
+    $OWNER $LOWER_TICK $UPPER_TICK \
+    --rpc-url $RPC_URL
+```
 
 ---
 
 ## 📊 Monitoring & Analytics
 
-### View Bot Performance
+### View AMM Status
 
 ```bash
-# Check performance stats
-cast call $BOT_ADDRESS \
-    "getPerformanceStats(address)" \
-    $TOKEN_X \
+# Check Concentrated AMM liquidity
+cast call $CONCENTRATED_AMM_ADDRESS \
+    "getTotalLiquidity()" \
     --rpc-url $RPC_URL
 
-# Check capital status
-cast call $BOT_ADDRESS \
-    "getCapitalStatus(address)" \
-    $TOKEN_X \
+# Check Pseudo-Arbitrage AMM pricing
+cast call $PSEUDO_ARB_AMM_ADDRESS \
+    "getCurrentPrice()" \
     --rpc-url $RPC_URL
 ```
 
 ### View Transaction History
 
 ```bash
-# Get bot execution events
+# Get swap events
 cast logs \
-    --address $BOT_ADDRESS \
+    --address $CONCENTRATED_AMM_ADDRESS \
     --from-block earliest \
     --rpc-url $RPC_URL \
-    "ArbitrageExecuted(address,address,uint256,uint256,uint256,uint256)"
+    "Swap(address,address,uint256,uint256)"
 ```
 
 ---
@@ -420,25 +348,24 @@ cast logs \
 export AQUA_ADDRESS=0x499943e74fb0ce105688beee8ef2abec5d936d31
 ```
 
-### Issue: "Insufficient capital"
+### Issue: "Insufficient liquidity"
 
 ```bash
-# Solution: Fund the bot
-cast send $BOT_ADDRESS "depositCapital(address,uint256)" ...
+# Solution: Add more liquidity to the AMM
+forge script packages/concentrated-amm/script/DeployConcentratedAMM.s.sol:AddLiquidity \
+    --rpc-url $RPC_URL --broadcast
 ```
 
-### Issue: "No opportunities found"
+### Issue: "Price out of range"
 
 **Causes:**
-1. Prices are in sync (no arbitrage available)
-2. Minimum thresholds too high
-3. Insufficient liquidity on one side
+1. Concentrated liquidity position is out of range
+2. Oracle price has deviated significantly
 
 **Solutions:**
 ```bash
-# Lower thresholds
-cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 25 ...
-cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 50 ...
+# Rebalance concentrated liquidity position
+# Or expand price range when creating new positions
 ```
 
 ### Issue: "Transaction reverts"
@@ -481,28 +408,23 @@ Addresses:
 - Aqua: 0x...
 - ConcentratedAMM: 0x...
 - ConcentratedBuilder: 0x...
-- PseudoArbRouter: 0x...
-- PseudoArbBuilder: 0x...
-- CrossAMMArbitrage: 0x...
-- CrossAMMArbitrageBot: 0x...
+- PseudoArbitrageAMM: 0x...
 
 Configuration:
-- Min Profit: [X]%
-- Min Discrepancy: [X]%
-- Max Capital Per Trade: [X] tokens
-- Monitoring Interval: [X] seconds
+- Concentrated AMM Fee Tier: [X]%
+- Pseudo-Arb Oracle: 0x...
+- Token Pairs: [TOKEN0]/[TOKEN1]
 
-Funding:
-- Bot Capital: [X] tokens
-- Token Address: 0x...
+Liquidity:
+- Concentrated AMM TVL: [X] tokens
+- Pseudo-Arb AMM TVL: [X] tokens
 
 Status:
 - [ ] Contracts deployed
 - [ ] Contracts verified on explorer
-- [ ] Bot funded
+- [ ] Liquidity positions created
 - [ ] Parameters configured
-- [ ] Monitoring active
-- [ ] First arbitrage tested
+- [ ] First swap tested
 ```
 
 ---
@@ -513,15 +435,15 @@ Your AMM system should now be deployed and running. Monitor the bot for the firs
 
 **Next Steps:**
 1. Create liquidity positions on both AMMs
-2. Start the monitoring bot
-3. Watch for first arbitrage execution
-4. Optimize parameters based on results
-5. Scale up capital gradually
+2. Test swaps on each AMM
+3. Monitor position performance
+4. Optimize fee tiers and ranges
+5. Scale up liquidity gradually
 
 **Need Help?**
-- Check logs: `tail -f bot.log`
+- Check logs: `cat deployments/*-deployment.log`
 - Review docs: See each AMM's documentation
 - Test mode: Run on testnet first
 
-**Happy Trading! 🚀**
+**Happy Building! 🚀**
 

@@ -2,21 +2,20 @@ No files changed, compilation skipped
 Script ran successfully.
 
 == Logs ==
-  Deploying new Aqua contract...
-  Aqua deployed at: 0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44
+  Using existing Aqua at: 0x465658bd0c994A01886815f9fDc968C85C6D330b
   
 Deploying ConcentratedAMM...
-  ConcentratedAMM deployed at: 0x7dC381faAC64F6547828EAF240aFb9Ca74B7d27A
+  ConcentratedAMM deployed at: 0x2d49707227e4d9976e5E394ed3C43d642742e2f4
   
 Deploying ConcentratedAMMStrategyBuilder...
-  StrategyBuilder deployed at: 0x3c046Df5BeB5b9fFEDFB8b5D67d7AFf289C8e95C
+  StrategyBuilder deployed at: 0x84Ac3E49017fc2d21945bde3aa70A161ac6fbeD6
   
 ========================================
   DEPLOYMENT SUMMARY
   ========================================
-  Aqua:             0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44
-  ConcentratedAMM:  0x7dC381faAC64F6547828EAF240aFb9Ca74B7d27A
-  StrategyBuilder:  0x3c046Df5BeB5b9fFEDFB8b5D67d7AFf289C8e95C
+  Aqua:             0x465658bd0c994A01886815f9fDc968C85C6D330b
+  ConcentratedAMM:  0x2d49707227e4d9976e5E394ed3C43d642742e2f4
+  StrategyBuilder:  0x84Ac3E49017fc2d21945bde3aa70A161ac6fbeD6
   ========================================
   
 Deployment info saved to: ./deployments/concentrated-amm-latest.json
@@ -27,11 +26,11 @@ Deployment info saved to: ./deployments/concentrated-amm-latest.json
 
 Chain 84532
 
-Estimated gas price: 0.19104449 gwei
+Estimated gas price: 0.099512068 gwei
 
-Estimated total gas used for script: 4075942
+Estimated total gas used for script: 3301496
 
-Estimated amount required: 0.00077868626065958 ETH
+Estimated amount required: 0.000328538694453728 ETH
 
 ==========================
 
@@ -40,13 +39,14 @@ Estimated amount required: 0.00077868626065958 ETH
 
 ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
 ##
-Start verification for (3) contracts
-Start verifying contract `0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44` deployed on base-sepolia
+Start verification for (2) contracts
+Start verifying contract `0x2d49707227e4d9976e5E394ed3C43d642742e2f4` deployed on base-sepolia
 EVM version: cancun
 Compiler version: 0.8.30
 Optimizations:    200
+Constructor args: 000000000000000000000000465658bd0c994a01886815f9fdc968c85c6d330b
 
-Submitting verification for [../pseudo-arbitrage-amm/lib/aqua/src/Aqua.sol:Aqua] 0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44.
+Submitting verification for [src/ConcentratedAMM.sol:ConcentratedAMM] 0x2d49707227e4d9976e5E394ed3C43d642742e2f4.
 Error: Encountered an error verifying this contract:
 Response: `NOTOK`
 Details:

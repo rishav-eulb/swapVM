@@ -11,7 +11,7 @@ Ran 10 tests for test/ConcentratedAMM.t.sol:ConcentratedAMMTest
 [FAIL: SafeBalancesForTokenNotInActiveStrategy(0x0000000000000000000000000000000000000001, 0x2e234DAe75C793f67A35089C9d99245E1C58470b, 0x3bb4be980a238dff223ec440e93963162ba2ecbb98c9e0aa1a1db3f3989a3667, 0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9)] testSwapExactOutput() (gas: 307569)
 [FAIL: SafeBalancesForTokenNotInActiveStrategy(0x0000000000000000000000000000000000000001, 0x2e234DAe75C793f67A35089C9d99245E1C58470b, 0x4960e7159502cd441bcb675aab839a790c2f0edbe3615783a95ac9d2055d655a, 0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9)] testSwapWithinRange() (gas: 307280)
 [PASS] testTickPriceConversion() (gas: 78539)
-Suite result: FAILED. 2 passed; 8 failed; 0 skipped; finished in 6.37ms (6.64ms CPU time)
+Suite result: FAILED. 2 passed; 8 failed; 0 skipped; finished in 8.33ms (18.58ms CPU time)
 
 ╭-------------------------------------------------------------+-----------------+------+--------+------+---------╮
 | ../pseudo-arbitrage-amm/lib/aqua/src/Aqua.sol:Aqua Contract |                 |      |        |      |         |
@@ -92,7 +92,7 @@ Suite result: FAILED. 2 passed; 8 failed; 0 skipped; finished in 6.37ms (6.64ms 
 ╰-----------------------------------------------+-----------------+-------+--------+-------+---------╯
 
 
-Ran 1 test suite in 17.09ms (6.37ms CPU time): 2 tests passed, 8 failed, 0 skipped (10 total tests)
+Ran 1 test suite in 18.73ms (8.33ms CPU time): 2 tests passed, 8 failed, 0 skipped (10 total tests)
 
 Failing tests:
 Encountered 8 failing tests in test/ConcentratedAMM.t.sol:ConcentratedAMMTest

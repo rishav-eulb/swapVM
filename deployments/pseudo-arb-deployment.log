@@ -1,49 +1,20 @@
-No files changed, compilation skipped
-Script ran successfully.
+Compiling 1 files with Solc 0.8.30
+Solc 0.8.30 finished in 457.37ms
+Error: Compiler run failed:
+Warning (3075): Comparison of internal function pointers can yield unexpected results in the legacy pipeline with the optimizer enabled, and will be disallowed entirely in the next breaking release.
+  --> ../shared-utils/src/ProgramBuilder.sol:35:17:
+   |
+35 |             if (self.opcodes[i] == targetOpcode) {
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Logs ==
-  Using existing Aqua at: 0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44
-  
-Deploying PseudoArbitrageAMM...
-  PseudoArbitrageAMM deployed at: 0xa124bA58Ee78Ef6399aC1EddC9dC860680CFC7A2
-  
-========================================
-  DEPLOYMENT SUMMARY
-  ========================================
-  Aqua:                  0x9bbD08B89F04f19C2e4ea4Dc826D208510F95c44
-  PseudoArbitrageAMM:    0xa124bA58Ee78Ef6399aC1EddC9dC860680CFC7A2
-  ========================================
-  
-Deployment info saved to: ./deployments/pseudo-arbitrage-amm-latest.json
+Error (6160): Wrong argument count for function call: 3 arguments given but expected 4.
+   --> script/DeployPseudoArbitrageAMM.s.sol:118:29:
+    |
+118 |         bytes32 orderHash = aqua.ship(order, balance0, balance1);
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-## Setting up 1 EVM.
-
-==========================
-
-Chain 84532
-
-Estimated gas price: 0.200271632 gwei
-
-Estimated total gas used for script: 2616532
-
-Estimated amount required: 0.000524017133820224 ETH
-
-==========================
-
-
-==========================
-
-ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-##
-Start verification for (1) contracts
-Start verifying contract `0xa124bA58Ee78Ef6399aC1EddC9dC860680CFC7A2` deployed on base-sepolia
-EVM version: cancun
-Compiler version: 0.8.30
-Optimizations:    1000000
-Constructor args: 0000000000000000000000009bbd08b89f04f19c2e4ea4dc826d208510f95c44
-
-Submitting verification for [src/strategies/PseudoArbitrageAMM.sol:PseudoArbitrageAMM] 0xa124bA58Ee78Ef6399aC1EddC9dC860680CFC7A2.
-Error: Encountered an error verifying this contract:
-Response: `NOTOK`
-Details:
-                        `Too many invalid api key attempts, please try again later`
+Error (6160): Wrong argument count for function call: 3 arguments given but expected 4.
+   --> script/DeployPseudoArbitrageAMM.s.sol:189:29:
+    |
+189 |         bytes32 orderHash = aqua.ship(order, balance0, balance1);
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

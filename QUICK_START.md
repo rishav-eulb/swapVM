@@ -14,6 +14,10 @@ nano .env  # Add your PRIVATE_KEY and RPC_URL
 # 2. Deploy everything
 ./deploy-all.sh
 
+# 3. Create liquidity positions
+cd packages/concentrated-amm
+forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition --rpc-url $RPC_URL --broadcast
+
 # Done! 🎉
 ```
 
@@ -64,34 +68,32 @@ This deploys:
 - ✅ Aqua (if needed)
 - ✅ ConcentratedAMM
 - ✅ PseudoArbitrageAMM
-- ✅ CrossAMMArbitrage Bot
 
-### 4. Fund the Bot (1 minute)
+### 4. Create Liquidity Positions (1 minute)
 
 ```bash
 # Load deployment addresses
 source .env.deployed
 
-# Fund bot with 1000 tokens (adjust for your token decimals)
-cast send $BOT_ADDRESS \
-    "depositCapital(address,uint256)" \
-    $TOKEN_X \
-    1000000000000000000000 \
+# Create a concentrated liquidity position
+cd packages/concentrated-amm
+forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
+    --rpc-url $RPC_URL \
+    --broadcast
+```
+
+### 5. Test Your AMMs (30 seconds)
+
+```bash
+# Test a swap on Concentrated AMM
+cast send $CONCENTRATED_AMM_ADDRESS \
+    "swap(address,address,uint256,uint256,address)" \
+    $TOKEN0 $TOKEN1 1000000000000000000 0 $YOUR_ADDRESS \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
 ```
 
-### 5. Start Monitoring (30 seconds)
-
-```bash
-# Install Node.js dependencies
-npm install ethers dotenv
-
-# Run the bot
-node scripts/monitor.js
-```
-
-**Done!** Your bot is now monitoring for arbitrage opportunities. 🤖
+**Done!** Your AMM system is now live! 🚀
 
 ---
 
@@ -115,7 +117,7 @@ export RPC_URL=https://rpc.sepolia.org
 
 ```bash
 # After deployment, create liquidity positions
-cd files/concentrated-amm
+cd packages/concentrated-amm
 
 export BUILDER_ADDRESS=$(cat ../../deployments/concentrated-amm-latest.json | jq -r '.strategyBuilder')
 export TOKEN0_ADDRESS=0xYourTestToken0
@@ -130,22 +132,17 @@ forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition \
 
 ## 🔧 Quick Configuration
 
-### Set Bot Parameters
+### Set AMM Parameters
 
 ```bash
 source .env.deployed
 
-# Minimum profit: 0.5%
-cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 50 \
+# Set Concentrated AMM fee tier (0.3% = 3000)
+cast send $CONCENTRATED_AMM_ADDRESS "setFeeTier(uint24)" 3000 \
     --rpc-url $RPC_URL --private-key $PRIVATE_KEY
 
-# Minimum discrepancy: 1%
-cast send $BOT_ADDRESS "setMinDiscrepancyBps(uint256)" 100 \
-    --rpc-url $RPC_URL --private-key $PRIVATE_KEY
-
-# Max capital per trade: 100 tokens
-cast send $BOT_ADDRESS "setMaxCapitalPerArbitrage(address,uint256)" \
-    $TOKEN_X 100000000000000000000 \
+# Update Pseudo-Arbitrage AMM oracle
+cast send $PSEUDO_ARB_AMM_ADDRESS "updateOracle(address)" $ORACLE_ADDRESS \
     --rpc-url $RPC_URL --private-key $PRIVATE_KEY
 ```
 
@@ -153,34 +150,26 @@ cast send $BOT_ADDRESS "setMaxCapitalPerArbitrage(address,uint256)" \
 
 ## 📊 Quick Status Check
 
-### Check Bot Status
+### Check AMM Status
 
 ```bash
 source .env.deployed
 
-# Check for opportunities
-forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities \
-    --rpc-url $RPC_URL
+# Check Concentrated AMM liquidity
+cast call $CONCENTRATED_AMM_ADDRESS "getTotalLiquidity()" --rpc-url $RPC_URL
+
+# Check Pseudo-Arbitrage AMM pricing
+cast call $PSEUDO_ARB_AMM_ADDRESS "getCurrentPrice()" --rpc-url $RPC_URL
 ```
 
-### View Performance
+### View Deployment Info
 
 ```bash
-# Get performance stats
-cast call $BOT_ADDRESS \
-    "getPerformanceStats(address)(uint256,uint256,uint256,uint256,uint256)" \
-    $TOKEN_X \
-    --rpc-url $RPC_URL
-```
+# View all deployed contracts
+cat deployments/deployment-summary.json
 
-### Check Capital
-
-```bash
-# View available capital
-cast call $BOT_ADDRESS \
-    "getCapitalStatus(address)(uint256,uint256,uint256)" \
-    $TOKEN_X \
-    --rpc-url $RPC_URL
+# Check specific AMM
+cast call $CONCENTRATED_AMM_ADDRESS "aqua()" --rpc-url $RPC_URL
 ```
 
 ---
@@ -206,17 +195,14 @@ cat deployments/deployment-summary.json
 ./deploy-all.sh
 ```
 
-### "No Opportunities Found"
+### "No Liquidity"
 
-This is normal! Arbitrage opportunities appear when:
-1. Market price changes
-2. Oracle updates (PseudoArbitrageAMM)
-3. ConcentratedAMM prices become stale
+This is expected after initial deployment!
 
-**To test manually:**
-- Create price differences by trading on one AMM
-- Wait for oracle to update
-- Bot should detect the gap
+**To add liquidity:**
+- Create positions on Concentrated AMM with specific price ranges
+- Deploy strategies on Pseudo-Arbitrage AMM with oracle pricing
+- Both AMMs will share the Aqua liquidity layer
 
 ### "Transaction Reverts"
 
@@ -234,27 +220,23 @@ cast balance $YOUR_ADDRESS --rpc-url $RPC_URL
 
 After deployment:
 
-1. **Monitor First 24 Hours**
-   - Watch bot logs
-   - Check for first arbitrage
-   - Adjust parameters if needed
+1. **Add More Liquidity**
+   - Create multiple positions with different ranges
+   - Monitor fee earnings from trades
+   - Rebalance positions as needed
 
-2. **Optimize Parameters**
+2. **Optimize Positions**
    ```bash
-   # Lower thresholds for more trades
-   cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 25 ...
-   
-   # Or raise for more selective trading
-   cast send $BOT_ADDRESS "setMinProfitBps(uint256)" 100 ...
+   # Create tighter ranges for higher fees
+   forge script packages/concentrated-amm/script/DeployConcentratedAMM.s.sol:CreateTightPosition \
+       --rpc-url $RPC_URL --broadcast
    ```
 
 3. **Scale Up**
    ```bash
-   # Add more capital
-   cast send $BOT_ADDRESS "depositCapital(address,uint256)" ...
-   
-   # Add more strategies
-   cast send $BOT_ADDRESS "addStrategy(...)" ...
+   # Add more token pairs
+   # Deploy to multiple networks
+   # Integrate with your dApp
    ```
 
 4. **Production Deployment**
@@ -296,7 +278,8 @@ cat deployments/deployment-summary.json
 **Verify Contracts:**
 ```bash
 # Check if contracts exist
-cast code $BOT_ADDRESS --rpc-url $RPC_URL
+cast code $CONCENTRATED_AMM_ADDRESS --rpc-url $RPC_URL
+cast code $PSEUDO_ARB_AMM_ADDRESS --rpc-url $RPC_URL
 ```
 
 **Test Connection:**
@@ -312,13 +295,13 @@ cast balance $YOUR_ADDRESS --rpc-url $RPC_URL
 
 ## 🎉 You're All Set!
 
-Your AMM arbitrage system is now deployed and running. The bot will automatically:
-- ✅ Monitor for price discrepancies
-- ✅ Calculate optimal arbitrage amounts
-- ✅ Execute profitable trades
-- ✅ Track performance metrics
+Your AMM system is now deployed and running. You can now:
+- ✅ Create liquidity positions on both AMMs
+- ✅ Execute swaps with competitive pricing
+- ✅ Earn fees from traders
+- ✅ Manage positions efficiently
 
-**Happy Trading! 🚀**
+**Happy Building! 🚀**
 
 ---
 
@@ -326,15 +309,15 @@ Your AMM arbitrage system is now deployed and running. The bot will automaticall
 
 ```bash
 # Full deployment
-cp .env.example .env && nano .env && ./deploy-all.sh && source .env.deployed && npm install && node scripts/monitor.js
+cp .env.example .env && nano .env && ./deploy-all.sh && source .env.deployed
 
-# Just monitoring (after deployment)
-source .env.deployed && node scripts/monitor.js
+# Create liquidity position
+source .env.deployed && cd packages/concentrated-amm && forge script script/DeployConcentratedAMM.s.sol:CreateExamplePosition --rpc-url $RPC_URL --broadcast
 
 # Quick status check
-source .env.deployed && forge script files/cross-amm-arbitrage/DeployCrossAMMArbitrage.s.sol:MonitorOpportunities --rpc-url $RPC_URL
+source .env.deployed && cast call $CONCENTRATED_AMM_ADDRESS "getTotalLiquidity()" --rpc-url $RPC_URL
 
-# Quick fund bot
-source .env.deployed && cast send $BOT_ADDRESS "depositCapital(address,uint256)" $TOKEN_X 1000000000000000000000 --rpc-url $RPC_URL --private-key $PRIVATE_KEY
+# Check deployment
+cat deployments/deployment-summary.json
 ```
 
